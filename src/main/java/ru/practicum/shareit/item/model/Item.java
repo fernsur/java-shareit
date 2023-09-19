@@ -1,7 +1,24 @@
 package ru.practicum.shareit.item.model;
 
-/**
- * TODO Sprint add-controllers.
- */
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+@Data
+@AllArgsConstructor
 public class Item {
+    private int id;
+
+    @NotBlank(message = "Название не может быть пустым.")
+    private String name;
+
+    @NotBlank(message = "Описание не может быть пустым.")
+    private String description;
+
+    @NotNull(message = "Статус не может быть пустым.")
+    private Boolean available;
+
+    private int ownerId;
 }
