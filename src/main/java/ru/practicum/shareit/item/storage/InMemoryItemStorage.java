@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.ArrayList;
@@ -57,31 +56,21 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public Item updateItem(Item item) {
-        Integer id = item.getId();
-        Item oldItem = items.get(id);
+        return items.put(item.getId(), item);
+    }
 
-        if (!items.containsKey(id)) {
-            log.warn("Вещь с id = {} не существует", id);
-            throw new UserNotFoundException("Такой вещи нет.");
-        }
-        if (item.getOwnerId() != oldItem.getOwnerId()) {
-            log.warn("Id = {} не соответсвует id владельца", item.getOwnerId());
-            throw new UserNotFoundException("Только владелец имеет право на редактирование.");
-        }
+    @Override
+    public boolean checkItem(int id) {
+        return items.containsKey(id);
+    }
 
-        if (item.getName() != null) {
-            String name = item.getName();
-            items.get(id).setName(name);
+    @Override
+    public void deleteItemByOwner(int id) {
+        for (Item item: items.values()) {
+           if (item.getOwnerId() == id) {
+               int itemId = item.getId();
+               items.remove(itemId);
+           }
         }
-        if (item.getDescription() != null) {
-            String description = item.getDescription();
-            items.get(id).setDescription(description);
-        }
-        if (item.getAvailable() != null) {
-            Boolean available = item.getAvailable();
-            items.get(id).setAvailable(available);
-        }
-
-        return items.get(id);
     }
 }

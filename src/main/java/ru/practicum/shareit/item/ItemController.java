@@ -64,6 +64,7 @@ public class ItemController {
                               @PathVariable int itemId,
                               @RequestHeader(OWNER) int ownerId) {
         log.info("Получен PATCH-запрос к эндпоинту /items/{itemId} на обновление вещи по id.");
-        return itemService.updateItem(itemDto, itemId, ownerId);
+        itemDto.setId(itemId);
+        return itemService.updateItem(itemDto, ownerId);
     }
 }

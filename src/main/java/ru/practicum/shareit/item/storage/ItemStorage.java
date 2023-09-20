@@ -14,4 +14,8 @@ public interface ItemStorage {
     Item createItem(Item item);
 
     Item updateItem(Item item);
+
+    boolean checkItem(int id);
+
+    void deleteItemByOwner(int id);
 }
