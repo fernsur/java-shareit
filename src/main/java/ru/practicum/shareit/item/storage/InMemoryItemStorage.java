@@ -68,7 +68,7 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public void deleteItemByOwner(int id) {
         Iterator<Item> itemIterator = items.values().iterator();
-        while(itemIterator.hasNext()) {
+        while (itemIterator.hasNext()) {
             Item nextItem = itemIterator.next();
             if (nextItem.getOwnerId() == id) {
                 itemIterator.remove();
