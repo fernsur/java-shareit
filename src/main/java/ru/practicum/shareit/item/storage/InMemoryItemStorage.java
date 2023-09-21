@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -66,11 +67,12 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public void deleteItemByOwner(int id) {
-        for (Item item: items.values()) {
-           if (item.getOwnerId() == id) {
-               int itemId = item.getId();
-               items.remove(itemId);
-           }
+        Iterator<Item> itemIterator = items.values().iterator();
+        while(itemIterator.hasNext()) {
+            Item nextItem = itemIterator.next();
+            if (nextItem.getOwnerId() == id) {
+                itemIterator.remove();
+            }
         }
     }
 }
