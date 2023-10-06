@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
-    Booking findFirstByItemIdAndEndIsBeforeAndStatusOrderByEndDesc(int itemId, LocalDateTime end, Status status);
+    Booking findFirstByItemIdAndStartIsBeforeAndStatusOrderByStartDesc(int itemId, LocalDateTime start, Status status);
 
     Booking findFirstByItemIdAndStartIsAfterAndStatusOrderByStartAsc(int itemId, LocalDateTime start, Status status);
 
