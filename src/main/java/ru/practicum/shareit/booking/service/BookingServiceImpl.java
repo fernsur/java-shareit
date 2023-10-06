@@ -39,7 +39,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto createBooking(BookingDtoInput bookingDto, int bookerId) {
         LocalDateTime start = bookingDto.getStart();
         LocalDateTime end = bookingDto.getEnd();
-        if(start.isAfter(end) || start.isEqual(end)) {
+        if (start.isAfter(end) || start.isEqual(end)) {
             String warning = "Время окончания бронирования должно быть после начала.";
             log.warn(warning);
             throw new ValidationException(warning);
@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
             throw new UserNotFoundException(warning);
         }
 
-        if(!available) {
+        if (!available) {
             String warning = "Вещь с id = " + itemId + " недоступна для бронирования";
             log.warn(warning);
             throw new ValidationException(warning);
