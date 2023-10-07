@@ -78,10 +78,9 @@ public class UserServiceImpl implements UserService {
         itemRepository.deleteAllByOwnerId(id);
     }
 
-    @Override
-    public User findUserById(int id) {
+    private User findUserById(int id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Невозможно обновить. Такого пользователя нет."));
+                .orElseThrow(() -> new UserNotFoundException("Невозможно найти. Такого пользователя нет."));
     }
 
     private void checkEmail(String email, int id) {

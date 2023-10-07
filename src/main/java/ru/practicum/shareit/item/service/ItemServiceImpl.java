@@ -18,7 +18,8 @@ import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,15 +31,15 @@ import java.util.stream.Collectors;
 @Service
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, UserService userService,
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository,
                            BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.itemRepository = itemRepository;
-        this.userService = userService;
+        this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
     }
@@ -122,7 +123,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(CommentDto commentDto, int itemId, int userId) {
-        userService.userById(userId);
+        findUserById(userId);
         findItemById(itemId);
         Booking booking = bookingRepository.findFirstByItemIdAndBookerIdAndEndIsBeforeAndStatus(itemId, userId,
                 LocalDateTime.now(), Status.APPROVED);
@@ -149,16 +150,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Item buildItem(ItemDto itemDto, int ownerId) {
-        UserDto owner = userService.userById(ownerId);
+        UserDto owner = findUserById(ownerId);
         itemDto.setOwner(owner);
         return ItemMapper.toItem(itemDto);
     }
 
     private List<CommentDto> commentsList(int id) {
-        return commentRepository.findAllByItemId(id)
+        return commentRepository.findAllByItemIdOrderByCreated(id)
                 .stream()
                 .map(ItemMapper::toCommentDto)
-                .sorted()
                 .collect(Collectors.toList());
+    }
+
+    private UserDto findUserById(int id) {
+        return UserMapper.toUserDto(userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Невозможно найти. Такого пользователя нет.")));
     }
 }
