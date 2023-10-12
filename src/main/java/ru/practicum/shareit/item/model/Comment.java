@@ -14,28 +14,33 @@ import javax.persistence.ManyToOne;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "items", schema = "public")
+@Table(name = "comments", schema = "public")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Item {
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @NotBlank(message = "Название не может быть пустым.")
-    private String name;
-
-    @NotBlank(message = "Описание не может быть пустым.")
-    private String description;
-
-    @NotNull(message = "Статус не может быть пустым.")
-    private Boolean available;
+    @NotBlank(message = "Комментарий не может быть пустым.")
+    @NotEmpty(message = "Комментарий не может быть пустым.")
+    private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    private User owner;
+    @JoinColumn(name = "item_id")
+    @NotNull
+    private Item item;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    @NotNull
+    private User author;
+
+    private LocalDateTime created;
 }

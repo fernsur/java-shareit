@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -25,7 +26,7 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
-    private static final String OWNER = "X-Sharer-User-Id";
+    private static final String USER_ID = "X-Sharer-User-Id";
 
     @Autowired
     public ItemController(ItemService itemService) {
@@ -33,13 +34,14 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto itemById(@PathVariable int itemId) {
+    public ItemDto itemById(@PathVariable int itemId,
+                            @RequestHeader(USER_ID) int userId) {
         log.info("Получен GET-запрос к эндпоинту /items/{itemId} на получение вещи по id.");
-        return itemService.itemById(itemId);
+        return itemService.itemById(itemId, userId);
     }
 
     @GetMapping()
-    public List<ItemDto> allItemsByOwner(@RequestHeader(OWNER) int ownerId) {
+    public List<ItemDto> allItemsByOwner(@RequestHeader(USER_ID) int ownerId) {
         log.info("Получен GET-запрос к эндпоинту /items на получение всех вещей владельца по id.");
         return itemService.allItemsByOwner(ownerId);
     }
@@ -53,7 +55,7 @@ public class ItemController {
     @ResponseBody
     @PostMapping()
     public ItemDto createItem(@Valid @RequestBody ItemDto itemDto,
-                              @RequestHeader(OWNER) int ownerId) {
+                              @RequestHeader(USER_ID) int ownerId) {
         log.info("Получен POST-запрос к эндпоинту /items на добавление вещи.");
         return itemService.createItem(itemDto, ownerId);
     }
@@ -62,9 +64,18 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestBody ItemDto itemDto,
                               @PathVariable int itemId,
-                              @RequestHeader(OWNER) int ownerId) {
+                              @RequestHeader(USER_ID) int ownerId) {
         log.info("Получен PATCH-запрос к эндпоинту /items/{itemId} на обновление вещи по id.");
         itemDto.setId(itemId);
         return itemService.updateItem(itemDto, ownerId);
+    }
+
+    @ResponseBody
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@Valid @RequestBody CommentDto commentDto,
+                                 @PathVariable int itemId,
+                                 @RequestHeader(USER_ID) int userId) {
+        log.info("Получен POST-запрос к эндпоинту /items/{itemId}/comment на добавление комментария.");
+        return itemService.addComment(commentDto, itemId, userId);
     }
 }

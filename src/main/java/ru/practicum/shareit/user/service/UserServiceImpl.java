@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -8,32 +9,33 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.practicum.shareit.exception.UserAlreadyExistsException;
-import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
-    private final ItemStorage itemStorage;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
     @Autowired
-    public UserServiceImpl(UserStorage userStorage, ItemStorage itemStorage) {
-        this.userStorage = userStorage;
-        this.itemStorage = itemStorage;
+    public UserServiceImpl(UserRepository userRepository, ItemRepository itemRepository) {
+        this.userRepository = userRepository;
+        this.itemRepository = itemRepository;
     }
 
     @Override
     public UserDto userById(int id) {
-        return UserMapper.toUserDto(userStorage.getById(id));
+        return UserMapper.toUserDto(findUserById(id));
     }
 
     @Override
     public List<UserDto> allUsers() {
-        return userStorage.getAllUsers()
+        return userRepository.findAll()
                 .stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
@@ -41,16 +43,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        checkEmail(user.getEmail(), 0);
-        return UserMapper.toUserDto(userStorage.createUser(user));
+        try {
+            User user = UserMapper.toUser(userDto);
+            return UserMapper.toUserDto(userRepository.save(user));
+        } catch (DataIntegrityViolationException e) {
+            String warning = "Пользователь с email = " + userDto.getEmail() + " уже существует";
+            log.warn(warning);
+            throw new UserAlreadyExistsException(warning);
+        }
     }
 
     @Override
     public UserDto updateUser(UserDto userDto, int id) {
         userDto.setId(id);
         User newUser = UserMapper.toUser(userDto);
-        User user = userStorage.getById(id);
+        User user = findUserById(id);
 
         if (newUser.getEmail() != null) {
             String email = newUser.getEmail();
@@ -62,17 +69,23 @@ public class UserServiceImpl implements UserService {
             user.setName(name);
         }
 
-        return UserMapper.toUserDto(userStorage.updateUser(user));
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
     public void deleteUser(int id) {
-        userStorage.deleteUser(id);
-        itemStorage.deleteItemByOwner(id);
+        userRepository.deleteById(id);
+        itemRepository.deleteAllByOwnerId(id);
+    }
+
+    private User findUserById(int id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Невозможно найти. Такого пользователя нет."));
     }
 
     private void checkEmail(String email, int id) {
-        List<User> userFilter = userStorage.getAllUsers().stream()
+        List<User> userFilter = userRepository.findAllByEmail(email)
+                .stream()
                 .filter(user -> user.getEmail().equals(email))
                 .filter(user -> user.getId() != id)
                 .collect(Collectors.toList());
