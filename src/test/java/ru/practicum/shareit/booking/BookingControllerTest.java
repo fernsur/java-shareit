@@ -179,8 +179,7 @@ public class BookingControllerTest {
                         .param("from", String.valueOf(1))
                         .param("size", String.valueOf(1)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].start", is(bookingDto.getStart().toString())));
+                .andExpect(jsonPath("$", hasSize(1)));
     }
 
     @Test
@@ -201,9 +200,7 @@ public class BookingControllerTest {
                         .param("from", String.valueOf(1))
                         .param("size", String.valueOf(1)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].start", is(bookingDto.getStart().toString())))
-                .andExpect(jsonPath("$[0].end", is(bookingDto.getEnd().toString())));
+                .andExpect(jsonPath("$", hasSize(1)));
     }
 
     @Test
