@@ -9,9 +9,9 @@ import java.util.List;
 public interface ItemService {
     ItemDto itemById(int id, int userId);
 
-    List<ItemDto> allItemsByOwner(int id);
+    List<ItemDto> allItemsByOwner(int id, int from, int size);
 
-    List<ItemDto> searchItem(String text);
+    List<ItemDto> searchItem(String text, int from, int size);
 
     ItemDto createItem(ItemDto itemDto, int ownerId);
 

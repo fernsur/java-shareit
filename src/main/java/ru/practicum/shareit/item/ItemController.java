@@ -41,15 +41,19 @@ public class ItemController {
     }
 
     @GetMapping()
-    public List<ItemDto> allItemsByOwner(@RequestHeader(USER_ID) int ownerId) {
+    public List<ItemDto> allItemsByOwner(@RequestHeader(USER_ID) int ownerId,
+                                         @RequestParam(defaultValue = "0") int from,
+                                         @RequestParam(defaultValue = "10") int size) {
         log.info("Получен GET-запрос к эндпоинту /items на получение всех вещей владельца по id.");
-        return itemService.allItemsByOwner(ownerId);
+        return itemService.allItemsByOwner(ownerId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItem(@RequestParam String text) {
+    public List<ItemDto> searchItem(@RequestParam String text,
+                                    @RequestParam(defaultValue = "0") int from,
+                                    @RequestParam(defaultValue = "10") int size) {
         log.info("Получен GET-запрос к эндпоинту /items/search на поиск вещи.");
-        return itemService.searchItem(text);
+        return itemService.searchItem(text, from, size);
     }
 
     @ResponseBody
