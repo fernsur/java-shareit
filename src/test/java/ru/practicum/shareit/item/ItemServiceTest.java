@@ -6,7 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingDtoInput;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.ItemNotFoundException;
@@ -27,13 +34,17 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Transactional
@@ -143,6 +154,33 @@ public class ItemServiceTest {
     }
 
     @Test
+    public void shouldAddComment() {
+        Item item = ItemMapper.toItem(itemDto);
+        User user = UserMapper.toUser(userDto);
+        BookingDtoInput bookingDtoInput = new BookingDtoInput(
+                1,
+                LocalDateTime.now().plusHours(20),
+                LocalDateTime.now().plusHours(40));
+        Booking booking = BookingMapper.toBooking(bookingDtoInput, item, user);
+        Comment comment = new Comment(1, "Test text", item, user, LocalDateTime.now());
+
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(item));
+        when(bookingRepository.findFirstByItemIdAndBookerIdAndEndIsBeforeAndStatus(any(Integer.class),
+                any(Integer.class), any(LocalDateTime.class), any(Status.class)))
+                .thenReturn(booking);
+        when(commentRepository.save(any(Comment.class)))
+                .thenReturn(comment);
+
+        CommentDto createdComment = itemService.addComment(commentDto, 1, 1);
+
+        assertEquals(commentDto.getId(), createdComment.getId());
+        assertEquals(commentDto.getText(), createdComment.getText());
+    }
+
+    @Test
     public void shouldNotAddComment() {
         Item item = ItemMapper.toItem(itemDto);
         User user = UserMapper.toUser(userDto);
@@ -155,7 +193,7 @@ public class ItemServiceTest {
                 any(Integer.class), any(LocalDateTime.class), any(Status.class)))
                 .thenReturn(null);
 
-        assertThrows(ValidationException.class, () -> itemService.addComment(commentDto,1,1));
+        assertThrows(ValidationException.class, () -> itemService.addComment(commentDto, 1, 1));
     }
 
     @Test
@@ -211,5 +249,59 @@ public class ItemServiceTest {
         assertEquals(commentDto.getId(), dto.getId());
         assertEquals(commentDto.getText(), dto.getText());
         assertEquals(commentDto.getAuthorName(), dto.getAuthorName());
+    }
+
+    @Test
+    public void shouldSearchItem() {
+        when(itemRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+                any(String.class), any(String.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<ItemDto> searchItems = itemService.searchItem("Text", 1, 2);
+
+        verify(itemRepository, times(1))
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+                        any(String.class), any(String.class), any(Pageable.class));
+        assertEquals(0, searchItems.size());
+    }
+
+    @Test
+    public void shouldSearchItemByTextEmpty() {
+        List<ItemDto> searchItems = itemService.searchItem("", 1, 2);
+        assertEquals(0, searchItems.size());
+    }
+
+    @Test
+    public void shouldAllItemsByOwner() {
+        Item item = ItemMapper.toItem(itemDto);
+        List<Item> items = new ArrayList<>();
+        items.add(item);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Item> page = new PageImpl<>(items, pageable, items.size());
+
+        when(itemRepository.findAllByOwnerId(any(Integer.class), any(Pageable.class)))
+                .thenReturn(page);
+        when(bookingRepository.findFirstByItemIdAndStartIsBeforeAndStatusOrderByStartDesc(
+                any(Integer.class), any(LocalDateTime.class), any(Status.class)))
+                .thenReturn(null);
+        when(bookingRepository.findFirstByItemIdAndStartIsAfterAndStatusOrderByStartAsc(
+                any(Integer.class), any(LocalDateTime.class), any(Status.class)))
+                .thenReturn(null);
+        when(commentRepository.findAllByItemIdOrderByCreated(any(Integer.class)))
+                .thenReturn(Collections.emptyList());
+
+        List<ItemDto> itemsByOwner = itemService.allItemsByOwner(1, 1, 2);
+
+        verify(itemRepository, times(1))
+                .findAllByOwnerId(any(Integer.class), any(Pageable.class));
+        verify(bookingRepository, times(1))
+                .findFirstByItemIdAndStartIsBeforeAndStatusOrderByStartDesc(
+                        any(Integer.class), any(LocalDateTime.class), any(Status.class));
+        verify(bookingRepository, times(1))
+                .findFirstByItemIdAndStartIsAfterAndStatusOrderByStartAsc(
+                        any(Integer.class), any(LocalDateTime.class), any(Status.class));
+        verify(commentRepository, times(1))
+                .findAllByItemIdOrderByCreated(any(Integer.class));
+        assertEquals(1, itemsByOwner.size());
     }
 }

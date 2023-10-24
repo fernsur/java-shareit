@@ -115,4 +115,18 @@ public class UserServiceTest {
         assertEquals(userDto.getName(), updatedUser.getName());
         assertEquals(userDto.getEmail(), updatedUser.getEmail());
     }
+
+    @Test
+    public void shouldNotUpdateUser() {
+        User user = new User(
+                3,
+                "Test",
+                "test@mail.ru");
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(UserMapper.toUser(userDto)));
+        when(userRepository.findAllByEmail(any(String.class)))
+                .thenReturn(List.of(user));
+
+        assertThrows(UserAlreadyExistsException.class, () -> userService.updateUser(userDto, 1));
+    }
 }

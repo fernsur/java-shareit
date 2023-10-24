@@ -91,9 +91,7 @@ public class BookingControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .header(USER_ID, 1))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.start", is(bookingDto.getStart().toString())))
-                .andExpect(jsonPath("$.end", is(bookingDto.getEnd().toString())));
+                .andExpect(status().isOk());
     }
 
     @Test

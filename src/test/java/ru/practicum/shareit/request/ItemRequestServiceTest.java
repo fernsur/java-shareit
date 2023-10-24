@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ItemRequestNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
@@ -130,5 +132,20 @@ public class ItemRequestServiceTest {
         ValidationException ex = assertThrows(
                 ValidationException.class, () -> requestService.allItemRequests(1,-1,3));
         assertEquals("Индекс или количество эллементов не могут быть отрицательными.", ex.getMessage());
+    }
+
+    @Test
+    public void shouldGetAllItemRequests() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(requestRepository.findAllByRequesterIdNot(any(Integer.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+        when(itemRepository.findAllByRequestId(any(Integer.class)))
+                .thenReturn(Collections.emptyList());
+
+        List<ItemRequestDto> saveRequest = requestService.allItemRequests(1,1,1);
+        verify(requestRepository, times(1))
+                .findAllByRequesterIdNot(any(Integer.class), any(Pageable.class));
+        assertEquals(0, saveRequest.size());
     }
 }

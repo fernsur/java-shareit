@@ -6,12 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoInput;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -26,12 +27,15 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Transactional
@@ -258,21 +262,210 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void shouldConvertingState() {
-        State state1 = State.valueOf("ALL");
-        State state2 = State.valueOf("CURRENT");
-        State state3 = State.valueOf("PAST");
-        State state4 = State.valueOf("FUTURE");
-        State state5 = State.valueOf("WAITING");
-        State state6 = State.valueOf("REJECTED");
-        State state7 = State.valueOf("UNKNOWN");
+    public void shouldGetBookingsStateAll() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdOrderByStartDesc(any(Integer.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
 
-        assertEquals(State.ALL, state1);
-        assertEquals(State.CURRENT, state2);
-        assertEquals(State.PAST, state3);
-        assertEquals(State.FUTURE, state4);
-        assertEquals(State.WAITING, state5);
-        assertEquals(State.REJECTED, state6);
-        assertEquals(State.UNKNOWN, state7);
+        List<BookingDto> getBookings = bookingService.getBookings("ALL", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByBookerIdOrderByStartDesc(any(Integer.class), any(Pageable.class));
+        assertEquals(0, getBookings.size());
+    }
+
+    @Test
+    public void shouldGetBookingsStateCurrent() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(Integer.class),
+                any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookings = bookingService.getBookings("CURRENT", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(Integer.class),
+                        any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
+        assertEquals(0, getBookings.size());
+    }
+
+    @Test
+    public void shouldGetBookingsStatePast() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(any(Integer.class),
+                any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookings = bookingService.getBookings("PAST", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndEndIsBeforeOrderByStartDesc(any(Integer.class),
+                        any(LocalDateTime.class), any(Pageable.class));
+        assertEquals(0, getBookings.size());
+    }
+
+    @Test
+    public void shouldGetBookingsStateFuture() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(any(Integer.class),
+                any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookings = bookingService.getBookings("FUTURE", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStartIsAfterOrderByStartDesc(any(Integer.class),
+                        any(LocalDateTime.class), any(Pageable.class));
+        assertEquals(0, getBookings.size());
+    }
+
+    @Test
+    public void shouldGetBookingsStateWaiting() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(any(Integer.class),
+                any(Status.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookings = bookingService.getBookings("WAITING", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStatusOrderByStartDesc(any(Integer.class),
+                        any(Status.class), any(Pageable.class));
+        assertEquals(0, getBookings.size());
+    }
+
+    @Test
+    public void shouldGetBookingsStateRejected() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(any(Integer.class),
+                any(Status.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookings = bookingService.getBookings("REJECTED", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStatusOrderByStartDesc(any(Integer.class),
+                        any(Status.class), any(Pageable.class));
+        assertEquals(0, getBookings.size());
+    }
+
+    @Test
+    public void shouldGetBookingsStateUnknown() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> bookingService.getBookings("GGGG", 1, 1, 1));
+        assertEquals("Unknown state: GGGG", ex.getMessage());
+    }
+
+    @Test
+    public void shouldGetBookingsOwnerStateAll() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByItemOwnerIdOrderByStartDesc(any(Integer.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("ALL", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdOrderByStartDesc(any(Integer.class), any(Pageable.class));
+        assertEquals(0, getBookingsOwner.size());
+    }
+
+    @Test
+    public void shouldGetBookingsOwnerStateCurrent() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(Integer.class),
+                any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("CURRENT", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(Integer.class),
+                        any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
+        assertEquals(0, getBookingsOwner.size());
+    }
+
+    @Test
+    public void shouldGetBookingsOwnerStatePast() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(any(Integer.class),
+                any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("PAST", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(any(Integer.class),
+                        any(LocalDateTime.class), any(Pageable.class));
+        assertEquals(0, getBookingsOwner.size());
+    }
+
+    @Test
+    public void shouldGetBookingsOwnerStateFuture() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(any(Integer.class),
+                any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("FUTURE", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStartIsAfterOrderByStartDesc(any(Integer.class),
+                        any(LocalDateTime.class), any(Pageable.class));
+        assertEquals(0, getBookingsOwner.size());
+    }
+
+    @Test
+    public void shouldGetBookingsOwnerStateWaiting() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(any(Integer.class),
+                any(Status.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("WAITING", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStatusOrderByStartDesc(any(Integer.class),
+                        any(Status.class), any(Pageable.class));
+        assertEquals(0, getBookingsOwner.size());
+    }
+
+    @Test
+    public void shouldGetBookingsOwnerStateRejected() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(any(Integer.class),
+                any(Status.class), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("REJECTED", 1, 1, 1);
+
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStatusOrderByStartDesc(any(Integer.class),
+                        any(Status.class), any(Pageable.class));
+        assertEquals(0, getBookingsOwner.size());
+    }
+
+    @Test
+    public void shouldGetBookingsOwnerStateUnknown() {
+        when(userRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(user));
+
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> bookingService.getBookingsOwner("GGGG", 1, 1, 1));
+        assertEquals("Unknown state: GGGG", ex.getMessage());
     }
 }
