@@ -232,13 +232,6 @@ public class ItemServiceTest {
     }
 
     @Test
-    public void shouldNotGetSearchItemByUncorrectedSize() {
-        ValidationException ex = assertThrows(
-                ValidationException.class, () -> itemService.searchItem("Text", -3, 1));
-        assertEquals("Индекс или количество эллементов не могут быть отрицательными.", ex.getMessage());
-    }
-
-    @Test
     public void shouldToCommentDto() {
         Item item = ItemMapper.toItem(itemDto);
         User user = UserMapper.toUser(userDto);

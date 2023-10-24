@@ -255,23 +255,16 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void shouldNotGetBookingsByUncorrectedSize() {
-        ValidationException ex = assertThrows(
-                ValidationException.class, () -> bookingService.getBookings("ALL", 1, -3, 1));
-        assertEquals("Индекс или количество эллементов не могут быть отрицательными.", ex.getMessage());
-    }
-
-    @Test
     public void shouldGetBookingsStateAll() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByBookerIdOrderByStartDesc(any(Integer.class), any(Pageable.class)))
+        when(bookingRepository.findByBookerId(any(Integer.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookings = bookingService.getBookings("ALL", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByBookerIdOrderByStartDesc(any(Integer.class), any(Pageable.class));
+                .findByBookerId(any(Integer.class), any(Pageable.class));
         assertEquals(0, getBookings.size());
     }
 
@@ -279,14 +272,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsStateCurrent() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(any(Integer.class),
                 any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookings = bookingService.getBookings("CURRENT", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(Integer.class),
+                .findByBookerIdAndStartIsBeforeAndEndIsAfter(any(Integer.class),
                         any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
         assertEquals(0, getBookings.size());
     }
@@ -295,14 +288,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsStatePast() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByBookerIdAndEndIsBefore(any(Integer.class),
                 any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookings = bookingService.getBookings("PAST", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByBookerIdAndEndIsBeforeOrderByStartDesc(any(Integer.class),
+                .findByBookerIdAndEndIsBefore(any(Integer.class),
                         any(LocalDateTime.class), any(Pageable.class));
         assertEquals(0, getBookings.size());
     }
@@ -311,14 +304,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsStateFuture() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByBookerIdAndStartIsAfter(any(Integer.class),
                 any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookings = bookingService.getBookings("FUTURE", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByBookerIdAndStartIsAfterOrderByStartDesc(any(Integer.class),
+                .findByBookerIdAndStartIsAfter(any(Integer.class),
                         any(LocalDateTime.class), any(Pageable.class));
         assertEquals(0, getBookings.size());
     }
@@ -327,14 +320,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsStateWaiting() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByBookerIdAndStatus(any(Integer.class),
                 any(Status.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookings = bookingService.getBookings("WAITING", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByBookerIdAndStatusOrderByStartDesc(any(Integer.class),
+                .findByBookerIdAndStatus(any(Integer.class),
                         any(Status.class), any(Pageable.class));
         assertEquals(0, getBookings.size());
     }
@@ -343,14 +336,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsStateRejected() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByBookerIdAndStatus(any(Integer.class),
                 any(Status.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookings = bookingService.getBookings("REJECTED", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByBookerIdAndStatusOrderByStartDesc(any(Integer.class),
+                .findByBookerIdAndStatus(any(Integer.class),
                         any(Status.class), any(Pageable.class));
         assertEquals(0, getBookings.size());
     }
@@ -369,13 +362,13 @@ public class BookingServiceTest {
     public void shouldGetBookingsOwnerStateAll() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByItemOwnerIdOrderByStartDesc(any(Integer.class), any(Pageable.class)))
+        when(bookingRepository.findByItemOwnerId(any(Integer.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("ALL", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByItemOwnerIdOrderByStartDesc(any(Integer.class), any(Pageable.class));
+                .findByItemOwnerId(any(Integer.class), any(Pageable.class));
         assertEquals(0, getBookingsOwner.size());
     }
 
@@ -383,14 +376,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsOwnerStateCurrent() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(any(Integer.class),
                 any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("CURRENT", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(Integer.class),
+                .findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(any(Integer.class),
                         any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
         assertEquals(0, getBookingsOwner.size());
     }
@@ -399,14 +392,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsOwnerStatePast() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByItemOwnerIdAndEndIsBefore(any(Integer.class),
                 any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("PAST", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(any(Integer.class),
+                .findByItemOwnerIdAndEndIsBefore(any(Integer.class),
                         any(LocalDateTime.class), any(Pageable.class));
         assertEquals(0, getBookingsOwner.size());
     }
@@ -415,14 +408,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsOwnerStateFuture() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByItemOwnerIdAndStartIsAfter(any(Integer.class),
                 any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("FUTURE", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByItemOwnerIdAndStartIsAfterOrderByStartDesc(any(Integer.class),
+                .findByItemOwnerIdAndStartIsAfter(any(Integer.class),
                         any(LocalDateTime.class), any(Pageable.class));
         assertEquals(0, getBookingsOwner.size());
     }
@@ -431,14 +424,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsOwnerStateWaiting() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByItemOwnerIdAndStatus(any(Integer.class),
                 any(Status.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("WAITING", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByItemOwnerIdAndStatusOrderByStartDesc(any(Integer.class),
+                .findByItemOwnerIdAndStatus(any(Integer.class),
                         any(Status.class), any(Pageable.class));
         assertEquals(0, getBookingsOwner.size());
     }
@@ -447,14 +440,14 @@ public class BookingServiceTest {
     public void shouldGetBookingsOwnerStateRejected() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
-        when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(any(Integer.class),
+        when(bookingRepository.findByItemOwnerIdAndStatus(any(Integer.class),
                 any(Status.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         List<BookingDto> getBookingsOwner = bookingService.getBookingsOwner("REJECTED", 1, 1, 1);
 
         verify(bookingRepository, times(1))
-                .findByItemOwnerIdAndStatusOrderByStartDesc(any(Integer.class),
+                .findByItemOwnerIdAndStatus(any(Integer.class),
                         any(Status.class), any(Pageable.class));
         assertEquals(0, getBookingsOwner.size());
     }

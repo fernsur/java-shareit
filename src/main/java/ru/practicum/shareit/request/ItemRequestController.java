@@ -38,9 +38,9 @@ public class ItemRequestController {
     }
 
     @GetMapping()
-    public List<ItemRequestDto> ownItemRequests(@RequestHeader(USER_ID) int requesterId) {
+    public List<ItemRequestDto> getItemRequestsByOwnerId(@RequestHeader(USER_ID) int requesterId) {
         log.info("Получен GET-запрос к эндпоинту /requests на получение списка собственных запросов на вещи.");
-        return requestService.ownItemRequests(requesterId);
+        return requestService.getItemRequestsByOwnerId(requesterId);
     }
 
     @GetMapping("/all")

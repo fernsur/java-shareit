@@ -81,7 +81,7 @@ public class ItemRequestControllerTest {
 
     @Test
     void shouldGetOwnItemRequests() throws Exception {
-        when(service.ownItemRequests(any(Integer.class)))
+        when(service.getItemRequestsByOwnerId(any(Integer.class)))
                 .thenReturn(List.of(requestDto));
 
         mvc.perform(get("/requests")

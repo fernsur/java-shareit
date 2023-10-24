@@ -19,7 +19,7 @@ public class ItemMapper {
         dto.setDescription(item.getDescription());
         dto.setAvailable(item.getAvailable());
         dto.setOwner(UserMapper.toUserDto(item.getOwner()));
-        dto.setRequestId(item.getRequestId() != null ? item.getRequestId() : null);
+        dto.setRequestId(item.getRequestId() == null ? null : item.getRequestId());
         if (lastBooking != null) {
             dto.setLastBooking(BookingMapper.toBookingDtoShort(lastBooking));
         }
@@ -42,7 +42,7 @@ public class ItemMapper {
         if (comments != null) {
             dto.setComments(comments);
         }
-        dto.setRequestId(item.getRequestId() != null ? item.getRequestId() : null);
+        dto.setRequestId(item.getRequestId() == null ? null : item.getRequestId());
         return dto;
     }
 
@@ -52,7 +52,7 @@ public class ItemMapper {
                         itemDto.getDescription(),
                         itemDto.getAvailable(),
                         UserMapper.toUser(itemDto.getOwner()),
-                        itemDto.getRequestId() != null ? itemDto.getRequestId() : null);
+                        itemDto.getRequestId() == null ? null : itemDto.getRequestId());
     }
 
     public static CommentDto toCommentDto(Comment comment) {

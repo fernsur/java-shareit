@@ -120,7 +120,7 @@ public class ItemRequestServiceTest {
                 .thenReturn(Optional.of(user));
         when(requestRepository.findAllByRequesterIdOrderByCreatedDesc(any(Integer.class)))
                 .thenReturn(List.of(ItemRequestMapper.toItemRequest(requestDto, user)));
-        List<ItemRequestDto> saveRequest = requestService.ownItemRequests(1);
+        List<ItemRequestDto> saveRequest = requestService.getItemRequestsByOwnerId(1);
 
         verify(requestRepository, times(1))
                 .findAllByRequesterIdOrderByCreatedDesc(1);

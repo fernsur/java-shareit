@@ -44,7 +44,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestDto> ownItemRequests(int requesterId) {
+    public List<ItemRequestDto> getItemRequestsByOwnerId(int requesterId) {
         findUserById(requesterId);
         return requestRepository.findAllByRequesterIdOrderByCreatedDesc(requesterId)
                 .stream()

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,11 +19,14 @@ import ru.practicum.shareit.booking.dto.BookingDtoInput;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import java.util.List;
 
 @Slf4j
 @RestController
+@Validated
 @RequestMapping(path = "/bookings")
 public class BookingController {
     private final BookingService bookingService;
@@ -60,8 +64,8 @@ public class BookingController {
     @GetMapping()
     public List<BookingDto> getBookings(@RequestParam(name = "state", defaultValue = "ALL") String state,
                                         @RequestHeader(USER_ID) int userId,
-                                        @RequestParam(defaultValue = "0") int from,
-                                        @RequestParam(defaultValue = "10") int size) {
+                                        @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                        @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен GET-запрос к эндпоинту /bookings на получение всех бронирований пользователя");
         return bookingService.getBookings(state, userId, from, size);
     }
@@ -69,8 +73,8 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> getBookingsOwner(@RequestParam(name = "state", defaultValue = "ALL") String state,
                                              @RequestHeader(USER_ID) int userId,
-                                             @RequestParam(defaultValue = "0") int from,
-                                             @RequestParam(defaultValue = "10") int size) {
+                                             @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                             @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен GET-запрос к эндпоинту /bookings/owner " +
                 "на получение бронирований для всех вещей пользователя");
         return bookingService.getBookingsOwner(state, userId, from, size);

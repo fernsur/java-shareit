@@ -16,25 +16,25 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Booking findFirstByItemIdAndBookerIdAndEndIsBeforeAndStatus(int itemId, int userId,
                                                                 LocalDateTime end, Status status);
 
-    Page<Booking> findByBookerIdOrderByStartDesc(int bookerId, Pageable page);
+    Page<Booking> findByBookerId(int bookerId, Pageable page);
 
-    Page<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(int bookerId, LocalDateTime start,
+    Page<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter(int bookerId, LocalDateTime start,
                                                               LocalDateTime end, Pageable page);
 
-    Page<Booking> findByBookerIdAndEndIsBeforeOrderByStartDesc(int bookerId, LocalDateTime end, Pageable page);
+    Page<Booking> findByBookerIdAndEndIsBefore(int bookerId, LocalDateTime end, Pageable page);
 
-    Page<Booking> findByBookerIdAndStartIsAfterOrderByStartDesc(int bookerId, LocalDateTime start, Pageable page);
+    Page<Booking> findByBookerIdAndStartIsAfter(int bookerId, LocalDateTime start, Pageable page);
 
-    Page<Booking> findByBookerIdAndStatusOrderByStartDesc(int bookerId, Status status, Pageable page);
+    Page<Booking> findByBookerIdAndStatus(int bookerId, Status status, Pageable page);
 
-    Page<Booking> findByItemOwnerIdOrderByStartDesc(int ownerId, Pageable page);
+    Page<Booking> findByItemOwnerId(int ownerId, Pageable page);
 
-    Page<Booking> findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(int ownerId, LocalDateTime start,
-                                                                              LocalDateTime end, Pageable page);
+    Page<Booking> findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(int ownerId, LocalDateTime start,
+                                                                 LocalDateTime end, Pageable page);
 
-    Page<Booking> findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(int ownerId, LocalDateTime end, Pageable page);
+    Page<Booking> findByItemOwnerIdAndEndIsBefore(int ownerId, LocalDateTime end, Pageable page);
 
-    Page<Booking> findByItemOwnerIdAndStartIsAfterOrderByStartDesc(int ownerId, LocalDateTime start, Pageable page);
+    Page<Booking> findByItemOwnerIdAndStartIsAfter(int ownerId, LocalDateTime start, Pageable page);
 
-    Page<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(int ownerId, Status status, Pageable page);
+    Page<Booking> findByItemOwnerIdAndStatus(int ownerId, Status status, Pageable page);
 }

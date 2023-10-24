@@ -62,7 +62,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> allItemsByOwner(int id, int from, int size) {
-        validateSize(from, size);
+        //validateSize(from, size);
         PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
         return itemRepository.findAllByOwnerId(id, page)
                 .stream()
@@ -80,7 +80,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItem(String text, int from, int size) {
-        validateSize(from, size);
         PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
         if (!text.isBlank() || !text.isEmpty()) {
             return itemRepository
@@ -170,14 +169,5 @@ public class ItemServiceImpl implements ItemService {
     private UserDto findUserById(int id) {
         return UserMapper.toUserDto(userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Невозможно найти. Такого пользователя нет.")));
-    }
-
-
-    private void validateSize(int from, int size) {
-        if (from < 0 || size <= 0) {
-            String warning = "Индекс или количество эллементов не могут быть отрицательными.";
-            log.warn(warning);
-            throw new ValidationException(warning);
-        }
     }
 }
