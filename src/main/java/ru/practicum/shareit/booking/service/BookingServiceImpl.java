@@ -2,6 +2,9 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDtoInput;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -116,30 +119,35 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookings(String state, int userId) {
+    public List<BookingDto> getBookings(String state, int userId, int from, int size) {
         findUserById(userId);
-        List<Booking> bookings;
+        Page<Booking> bookings;
         State st = findState(state);
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size, sort);
 
         switch (st) {
             case ALL:
-                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByBookerId(userId, page);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
-                        LocalDateTime.now(), LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(userId,
+                        LocalDateTime.now(), LocalDateTime.now(), page);
                 break;
             case PAST:
-                bookings = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndEndIsBefore(userId,
+                        LocalDateTime.now(), page);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndStartIsAfter(userId,
+                        LocalDateTime.now(), page);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
+                bookings = bookingRepository.findByBookerIdAndStatus(userId,
+                        Status.WAITING, page);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                bookings = bookingRepository.findByBookerIdAndStatus(userId, Status.REJECTED, page);
                 break;
             default:
                 String warning = "Unknown state: ";
@@ -153,32 +161,34 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsOwner(String state, int userId) {
+    public List<BookingDto> getBookingsOwner(String state, int userId, int from, int size) {
         findUserById(userId);
-        List<Booking> bookings;
+        Page<Booking> bookings;
         State st = findState(state);
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size, sort);
 
         switch (st) {
             case ALL:
-                bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByItemOwnerId(userId, page);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
-                        LocalDateTime.now(), LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId,
+                        LocalDateTime.now(), LocalDateTime.now(), page);
                 break;
             case PAST:
-                bookings = bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(userId,
-                        LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerIdAndEndIsBefore(userId,
+                        LocalDateTime.now(), page);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId,
-                        LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerIdAndStartIsAfter(userId,
+                        LocalDateTime.now(), page);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
+                bookings = bookingRepository.findByItemOwnerIdAndStatus(userId, Status.WAITING, page);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                bookings = bookingRepository.findByItemOwnerIdAndStatus(userId, Status.REJECTED, page);
                 break;
             default:
                 String warning = "Unknown state: ";

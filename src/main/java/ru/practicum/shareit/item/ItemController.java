@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,11 +19,14 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import java.util.List;
 
 @Slf4j
 @RestController
+@Validated
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
@@ -41,15 +45,19 @@ public class ItemController {
     }
 
     @GetMapping()
-    public List<ItemDto> allItemsByOwner(@RequestHeader(USER_ID) int ownerId) {
+    public List<ItemDto> allItemsByOwner(@RequestHeader(USER_ID) int ownerId,
+                                         @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                         @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен GET-запрос к эндпоинту /items на получение всех вещей владельца по id.");
-        return itemService.allItemsByOwner(ownerId);
+        return itemService.allItemsByOwner(ownerId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItem(@RequestParam String text) {
+    public List<ItemDto> searchItem(@RequestParam String text,
+                                    @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                    @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен GET-запрос к эндпоинту /items/search на поиск вещи.");
-        return itemService.searchItem(text);
+        return itemService.searchItem(text, from, size);
     }
 
     @ResponseBody

@@ -29,6 +29,8 @@ public class ItemDto {
     @JsonIgnore
     private UserDto owner;
 
+    private Integer requestId;
+
     private BookingDtoShort lastBooking;
 
     private BookingDtoShort nextBooking;

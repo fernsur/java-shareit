@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import ru.practicum.shareit.booking.model.Booking;
@@ -60,8 +61,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> allItemsByOwner(int id) {
-        return itemRepository.findAllByOwnerId(id)
+    public List<ItemDto> allItemsByOwner(int id, int from, int size) {
+        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
+        return itemRepository.findAllByOwnerId(id, page)
                 .stream()
                 .map(item -> ItemMapper.toItemDto(item,
                                         bookingRepository
@@ -76,10 +78,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItem(String text) {
+    public List<ItemDto> searchItem(String text, int from, int size) {
+        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
         if (!text.isBlank() || !text.isEmpty()) {
             return itemRepository
-                    .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text)
+                    .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text, page)
                     .stream()
                     .map(item -> ItemMapper.toItemDtoShort(item, null))
                     .collect(Collectors.toList());
@@ -100,7 +103,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = findItemById(id);
         Item newItem = buildItem(itemDto, ownerId);
 
-        if (newItem.getOwner().getId() != item.getOwner().getId()) {
+        if (ownerId != item.getOwner().getId()) {
             log.warn("Id = {} не соответсвует id владельца", newItem.getOwner().getId());
             throw new UserNotFoundException("Только владелец имеет право на редактирование.");
         }
