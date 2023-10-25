@@ -62,7 +62,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> allItemsByOwner(int id, int from, int size) {
-        //validateSize(from, size);
         PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
         return itemRepository.findAllByOwnerId(id, page)
                 .stream()
