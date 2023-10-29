@@ -3,6 +3,8 @@ package ru.practicum.shareit.request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -46,8 +48,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> allItemRequests(@RequestHeader(USER_ID) int userId,
-                                                  @RequestParam(defaultValue = "0") int from,
-                                                  @RequestParam(defaultValue = "10") int size) {
+                                                  @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                  @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получен GET-запрос к эндпоинту /requests/all на получение списка запросов на вещи.");
         return requestClient.allItemRequests(userId, from, size);
     }

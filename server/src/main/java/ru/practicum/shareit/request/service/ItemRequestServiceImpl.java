@@ -54,11 +54,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> allItemRequests(int userId, int from, int size) {
-        if (from < 0 || size <= 0) {
-            String warning = "Индекс или количество эллементов не могут быть отрицательными.";
-            log.warn(warning);
-            throw new ValidationException(warning);
-        }
         findUserById(userId);
 
         PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
