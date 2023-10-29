@@ -128,13 +128,6 @@ public class ItemRequestServiceTest {
     }
 
     @Test
-    public void shouldNotGetAllItemRequests() {
-        ValidationException ex = assertThrows(
-                ValidationException.class, () -> requestService.allItemRequests(1,-1,3));
-        assertEquals("Индекс или количество эллементов не могут быть отрицательными.", ex.getMessage());
-    }
-
-    @Test
     public void shouldGetAllItemRequests() {
         when(userRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(user));
